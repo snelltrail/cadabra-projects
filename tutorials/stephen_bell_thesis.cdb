@@ -1,0 +1,52 @@
+def post_process(ex):
+    eliminate_kronecker(ex) 
+    canonicalise(ex) 
+    rename_dummies(ex) 
+    collect_terms(ex)
+
+{a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p}::Indices(Vector, position=independent).
+{A,B,C,D,E,F,G,H}::Indices(Tractor,position=independent).
+\nabla{#}::Derivative.
+\delta_{a}^{b}::KroneckerDelta.
+W_{a b c d}::RiemannTensor.
+\mu_{a b}::AntiSymmetric.
+
+def contract(ex):
+    substitute(ex,$X^{A} X_{A} ->0$) 
+    substitute(ex,$X^{A} Z_{A}^{a}->0$) 
+    substitute(ex,$X^{A} Y_{A}-> 1$) 
+    substitute(ex,$Z^{A}_{a} X_{A}->0$) 
+    substitute(ex, $Z^{A}_{a} Z_{A}^{b}->\delta_{a}^{b}$) 
+    substitute(ex,$Z^{A}_{a} Y_{A}->0$) 
+    substitute(ex,$Y^{A} X_{A} ->1$) 
+    substitute(ex,$Y^{A} Z_{A}^{a}->0$) 
+    substitute(ex,$Y^{A} Y_{A}->0$) 
+    return ex
+
+S:=S^{A B} -> \upsilon^{a} \upsilon^{b} Z^{A}_{a} Z^{B}_{b}+s Y^{A} X^{B}+ s Y^{B} X^{A} - \alpha^{a} Z^{A}_{a} X^{B} - \alpha^{a} Z^{B}_{a} X^{A} - \frac{1}{s} \alpha^{a}\alpha_{a} X^{A} X^{B};
+
+K:=K_{B C} ->k_{c} Y_{B} Z_{C}^{c} - k_{c} Y_{C} Z_{B}^{c} +\mu_{b c} Z_{B}^{b} Z_{C}^{c} + \nu X_{B} Y_{C} - \nu X_{C} Y_{B} + \rho_{b} Z_{B}^{b} X_{C} - \rho_{b} Z_{C}^{b} X_{B};
+
+O:=\Omega_{D A} -> k^{e} \upsilon^{f} W_{e f d a} Z_{D}^{d} Z_{A}^{a} + k^{e} \upsilon^{f} C_{e f d} Z_{D}^{d} X_{A} - k^{e} \upsilon^{f} C_{e f b} Z_{A}^{b} X_{D});
+
+def sub(ex):
+    substitute(ex,S) 
+    substitute(ex,K) 
+    substitute(ex,O) 
+    return ex
+
+ex:=S^{A B} K_{B C} S^{C D} \Omega_{D A};
+
+sub(ex);
+
+distribute(_);contract(_);
+
+sort_product(_);contract(_);contract(_);
+
+quantity:=S^{A B} K_{B C} S^{C D} K_{D A};
+
+sub(_);
+
+distribute(_);contract(_);
+
+sort_product(_);contract(_);contract(_);
